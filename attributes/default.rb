@@ -19,8 +19,22 @@
 
 default["go"]["method"] = "package"
 
-default["go"]["zypper"]["enabled"] = true
-default["go"]["zypper"]["alias"] = "go"
-default["go"]["zypper"]["title"] = "Go"
-default["go"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/devel:/languages:/go/openSUSE_#{node["platform_version"].to_i.to_s == node["platform_version"] ? "Tumbleweed" : node["platform_version"]}/"
-default["go"]["zypper"]["key"] = "#{node["go"]["zypper"]["repo"]}repodata/repomd.xml.key"
+case node["platform_family"]
+when "suse"
+  repo = case node["platform_version"]
+  when /\A13\.\d+\z/
+    "openSUSE_#{node["platform_version"]}"
+  when /\A42\.\d+\z/
+    "openSUSE_Leap_#{node["platform_version"]}"
+  when /\A\d{8}\z/
+    "openSUSE_Tumbleweed"
+  else
+    raise "Unsupported SUSE version"
+  end
+
+  default["go"]["zypper"]["enabled"] = true
+  default["go"]["zypper"]["alias"] = "go"
+  default["go"]["zypper"]["title"] = "Go"
+  default["go"]["zypper"]["repo"] = "http://download.opensuse.org/repositories/devel:/languages:/go/#{repo}/"
+  default["go"]["zypper"]["key"] = "#{node["go"]["zypper"]["repo"]}repodata/repomd.xml.key"
+end
